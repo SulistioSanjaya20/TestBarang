@@ -18,51 +18,49 @@ public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.
 
     private ArrayList<Barang> daftarBarang;
     private Context context;
+    FirebaseDataListener listener;
 
-    public AdapterLihatBarang(ArrayList<Barang> barangs, Context ctx) {
+    public AdapterLihatBarang(ArrayList<Barang> barangs, Context c){
+        //Inisialisasi data dan variabel yang akan digunakan
         daftarBarang = barangs;
-        context = ctx;
+        context = c;
+        listener = (FirebaseDataListener) c;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
-        TextView tvTitle;
-
-        ViewHolder(View v) {
-            super(v);
-            tvTitle = (TextView) v.findViewById(R.id.tv_namabarang);
-        }
-
+    @NonNull
+    @Override
+    public AdapterLihatBarang.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        //Inisialisasi ViewHolder
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_barang, parent, false);
+        // Mengeset ukuran view, margin, padding dan parameter layout lainnya
+        ViewHolder viewHolder = new ViewHolder(view);
+        return viewHolder;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_barang, parent,false);
-
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull AdapterLihatBarang.ViewHolder holder, final int position) {
+        //Menampilkan data pada view
         final String name = daftarBarang.get(position).getNama();
+        final String kode = daftarBarang.get(position).getKode();
         holder.tvTitle.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View v) {
+                //Untuk latihan selanjutnya, jika ingin membaca detail data
             }
         });
         holder.tvTitle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View view) {
+            public boolean onLongClick(View v) {
                 final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.update);
+                dialog.setContentView(R.layout.activity_update__data);
                 dialog.setTitle("Pilih Aksi");
                 dialog.show();
 
-                Button editButton = (Button) dialog.findViewById(R.id.bt_edit_data);
-                Button delButton = (Button) dialog.findViewById(R.id.bt_delete_data);
+                Button updateButton = (Button) dialog.findViewById(R.id.bt_edit_data);
+                Button deleteButton = (Button) dialog.findViewById(R.id.bt_delete_data);
 
                 //apabila tombol edit diklik
-                editButton.setOnClickListener(
+                updateButton.setOnClickListener(
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -71,21 +69,42 @@ public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.
                             }
                         }
                 );
+
+                //apabila tombol delete diklik
+                deleteButton.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                                listener.onDeleteData(daftarBarang.get(position), position);
+                            }
+                        }
+                );
                 return true;
             }
         });
         holder.tvTitle.setText(name);
+    }
 
+    @Override
+    public int getItemCount() {
+        //Mengembalikan jumlah item pada barang
+        return daftarBarang.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        /*Inisialisasi View
+         * Disini kita hanya menggunakan data string untuk tiap item
+         * dan juga viewnya hanyalah satu TextView*/
+        TextView tvTitle;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvTitle = itemView.findViewById(R.id.tv_namabarang);
+        }
     }
 
     public interface FirebaseDataListener{
         void onDeleteData(Barang barang, int position);
     }
-
-
-    @Override
-    public int getItemCount() {
-        return daftarBarang.size();
-    }
-
 }

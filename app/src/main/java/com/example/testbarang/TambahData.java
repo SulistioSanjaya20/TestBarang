@@ -63,8 +63,7 @@ public class TambahData extends AppCompatActivity {
 
                     InputMethodManager imm = (InputMethodManager)
                             getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(
-                            etNama.getWindowToken(), 0);
+                    imm.hideSoftInputFromWindow(etKode.getWindowToken(), 0);
 
                 }
             });
@@ -75,22 +74,37 @@ public class TambahData extends AppCompatActivity {
         // Cek apakah ada fields yang kosong, sebelum disubmit
         return TextUtils.isEmpty(s);
     }
+
+    public void submitBrg(Barang brg){
+        /*Berikut ini adalah kode yang digunakan untuk mengirimkan data
+         * ke firebase RealTime Database dan juga kita set onSuccessListener
+         * yang berisi kode yang akan dijalankan ketika data berhasil ditambahkan*/
+        database.child("Barang").push().setValue(brg).addOnSuccessListener(this, new OnSuccessListener<Void>(){
+            @Override
+            public void onSuccess(Void aVoid){
+                etKode.setText("");
+                etNama.setText("");
+                Toast.makeText(getApplicationContext(), "Data berhasil ditambahkan", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
     private void updateBarang(Barang barang) {
         /**
          * Baris kode yang digunakan untuk mengupdate data barang
          * yang sudah dimasukkan di Firebase Realtime Database
          */
-        database.child("barang") //akses parent index, ibaratnya seperti nama tabel
-                .child(barang.getKode()) //select barang berdasarkan key
+        database.child("Barang") //akses parent index, ibaratnya seperti nama tabel
+                .child(barang.getKode()) //select barang berdasarkan kode
                 .setValue(barang) //set value barang yang baru
                 .addOnSuccessListener(this, new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-
                         /**
                          * Baris kode yang akan dipanggil apabila proses update barang sukses
                          */
-                        Snackbar.make(findViewById(R.id.btnTambah), "Data berhasil diupdatekan", Snackbar.LENGTH_LONG).setAction("Oke", new View.OnClickListener() {
+                        Snackbar.make(findViewById(R.id.btnOk), "Data berhasil di update", Snackbar.LENGTH_LONG).setAction("Oke", new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 finish();
@@ -100,18 +114,6 @@ public class TambahData extends AppCompatActivity {
                 });
     }
 
-    public void submitBrg(Barang brg){
-        database.child("Barang").push().setValue(brg).addOnSuccessListener(this,
-                new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        etKode.setText("");
-                        etNama.setText("");
-                        Toast.makeText(getApplicationContext(),"Data berhasil ditambahkan" ,
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
     public static Intent getActIntent(Activity activity){
         return new Intent(activity, TambahData.class);
     }
